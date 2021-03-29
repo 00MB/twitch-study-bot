@@ -10,11 +10,18 @@ class pomo():
                 if name in timer:
                     return timer
     
-    def timerset(self, name, time_length, timer_type):
+    def set_timer(self, name, time_length, timer_type):
         current_time = datetime.datetime.now()
-        self.active_timers.append([name, current_time, "study"])
+        finish_time = current_time + datetime.timedelta(minutes=int(time_length))
+        self.active_timers.append([name, finish_time, "study"])
 
-    def canceltimer(self, name):
+    def time_left(self, name):
+        user = self.get_timer(name)
+        if user is not None:
+            time = user[1] - datetime.datetime.now()
+            return int(time.total_seconds() / 60)
+
+    def cancel_timer(self, name):
         if any(name in x for x in self.active_timers):
             for timer in self.active_timers:
                 if name in timer:

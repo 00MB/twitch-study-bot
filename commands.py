@@ -81,7 +81,7 @@ async def btc(ctx, ticker_symbol):
 #03 - Pomodoro
 @bot.command(name='cancel')
 async def cancel(ctx):
-    if timers.canceltimer(ctx.author.name):
+    if timers.cancel_timer(ctx.author.name):
         await ctx.send(f"@{ctx.author.name} Removed timer")
     else:
         await ctx.send(f"@{ctx.author.name} No current timers")
@@ -90,11 +90,11 @@ async def cancel(ctx):
 async def study(ctx, study_time=''):
     if await timer_validation(ctx, study_time):
         await ctx.send(f'@{ctx.author.name} has started studying for {study_time} minutes!')
-        timers.timerset(ctx.author.name, study_time, "study")
-        await asyncio.sleep(int(study_time))
+        timers.set_timer(ctx.author.name, study_time, "study")
+        await asyncio.sleep(int(study_time)*60)
         if timers.get_timer(ctx.author.name) is not None:
             await ctx.send(f'@{ctx.author.name} time up! Good work, take a break with !break')
-            timers.canceltimer(ctx.author.name)
+            timers.cancel_timer(ctx.author.name)
 
 @bot.command(name='break')
 async def study(ctx, break_time=''):
@@ -103,7 +103,11 @@ async def study(ctx, break_time=''):
 @bot.command(name='timer')
 async def timer(ctx):
     if timers.get_timer(ctx.author.name) is not None:
-        await ctx.send(timers.get_timer(ctx.author.name))
+        time_left = timers.time_left(ctx.author.name)
+        if time_left < 1:
+            await ctx.send(f"@{ctx.author.name} You have less than 1 minute left, keep it up")
+        else:
+            await Client.send_message(f"@{ctx.author.name} You have {time_left} minutes left, keep it up")
     else:
         await ctx.send(f"@{ctx.author.name} You have no current timers")
 
