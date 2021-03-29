@@ -8,8 +8,6 @@
 # 04 - Points
 # 05 - Games
 # 06 - Misc
-
-import time
 import os
 import requests
 from dotenv import load_dotenv
@@ -17,14 +15,14 @@ from twitchio.ext import commands
 from twitchio.webhook import UserFollows
 from dialogflow_bot import send_message
 from random import choice
+from pomo_logic import pomo
 import yfinance as yf
 import asyncio
 load_dotenv()
 
 #00 - Setup
 points_list = {}
-active_timers = []
-rest_timers = {}
+timers = pomo()
 
 bot = commands.Bot(
     irc_token=os.getenv('TMI_TOKEN'),
@@ -43,11 +41,6 @@ async def event_ready():
 
 
 #01 - Validation
-def no_current_timers(ctx):
-    if any(ctx.author.name in x for x in active_timers) or ctx.author.name in rest_timers.keys():
-        return False
-    return True
-
 def isint(var):
     try:
         int(var)
@@ -55,13 +48,16 @@ def isint(var):
         return None
     return int(var)
 
+@bot.event
 async def timer_validation(ctx, time):
-    if isint(time) is not None and no_current_timers(ctx):
-        return True
-    else:
-        await ctx.send_privmsg(ctx.author.name, 'You currently have an active timer, !timer to check your timers')
-        return False
-
+    if isint(time):
+        if int(time) < 5 or int(time) > 60:
+            await ctx.send(f"@{ctx.author.name} You can't study for that amount of time, please choose a different time!")
+        elif not None and timers.get_timer(ctx.author.name) is None:
+            return True
+        else:
+            await ctx.send(f"@{ctx.author.name} You currently have an active timer, !timer to check your timers")
+    return False
 
 #02 - Finance
 @bot.command(name='btc')
@@ -83,14 +79,37 @@ async def btc(ctx, ticker_symbol):
 
 
 #03 - Pomodoro
-@bot.command(name='study')
-async def test(ctx, study_time=''):
-    if await timer_validation(ctx, study_time):
-        active_timers.append((ctx.author.name, time, "study"))
-        await ctx.send(f'@{ctx.author.name} has started studying for {study_time} minutes!')
-        await asyncio.sleep(int(study_time))
-        await ctx.send(f'time up!')
+@bot.command(name='cancel')
+async def cancel(ctx):
+    if timers.canceltimer(ctx.author.name):
+        await ctx.send(f"@{ctx.author.name} Removed timer")
+    else:
+        await ctx.send(f"@{ctx.author.name} No current timers")
 
+@bot.command(name='study')
+async def study(ctx, study_time=''):
+    if await timer_validation(ctx, study_time):
+        await ctx.send(f'@{ctx.author.name} has started studying for {study_time} minutes!')
+        timers.timerset(ctx.author.name, study_time, "study")
+        await asyncio.sleep(int(study_time))
+        if timers.get_timer(ctx.author.name) is not None:
+            await ctx.send(f'@{ctx.author.name} time up! Good work, take a break with !break')
+            timers.canceltimer(ctx.author.name)
+
+@bot.command(name='break')
+async def study(ctx, break_time=''):
+    pass
+
+@bot.command(name='timer')
+async def timer(ctx):
+    if timers.get_timer(ctx.author.name) is not None:
+        await ctx.send(timers.get_timer(ctx.author.name))
+    else:
+        await ctx.send(f"@{ctx.author.name} You have no current timers")
+
+@bot.command(name="grinders")
+async def grinders(ctx):
+    await ctx.send(timers.active_timers)
 
 #04 - Points
 @bot.command(name='givepoints')
