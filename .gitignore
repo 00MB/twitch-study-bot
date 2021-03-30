@@ -1,6 +1,6 @@
+.vscode
 .env
 /env
-dialogflow_bot.py
 /__pycache__
 *.db
 users.db-journal

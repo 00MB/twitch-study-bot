@@ -69,7 +69,7 @@ async def timer_validation(ctx, time):
 async def btc(ctx):
     response = requests.get("https://api.coindesk.com/v1/bpi/currentprice.json")
     data = response.json()["bpi"]["USD"]["rate"]
-    await ctx.send(f"BTC price rn: ${data}")
+    await ctx.send(f"{ctx.author.name} BTC price rn: ${data}")
 
 @bot.command(name='price')
 async def btc(ctx, ticker_symbol):
@@ -80,7 +80,7 @@ async def btc(ctx, ticker_symbol):
     except:
         await ctx.send(f"{ctx.author.name} {ticker_symbol.upper()} is not a valid ticker!")
         return
-    await ctx.send(f"{ticker_symbol.upper()} price rn: ${round(price, 2)}")
+    await ctx.send(f"{ctx.author.name} {ticker_symbol.upper()} price rn: ${round(price, 2)}")
 
 
 #03 - Pomodoro
@@ -138,23 +138,23 @@ async def timer(ctx):
 @bot.command(name="grinders")
 async def grinders(ctx):
     timer_array = timers.active_timers
-    message = "People studying: "
+    message = f"{ctx.author.name} People studying: "
     for user in timer_array:
         if user[2] == "study":
             message += user[0]+" "
-    if message == "People studying: ":
-        message = "Nobody is studying, be the first!"
+    if message == f"{ctx.author.name} People studying: ":
+        message = f"{ctx.author.name} Nobody is studying, be the first!"
     await ctx.send(message)
 
 @bot.command(name="sleepers")
 async def grinders(ctx):
     timer_array = timers.active_timers
-    message = "Taking a break: "
+    message = f"{ctx.author.name} Taking a break: "
     for user in timer_array:
         if user[2] == "break":
             message += user[0]+", "
-    if message == "Taking a break: ":
-        message = "Nobody is taking a break!"
+    if message == f"{ctx.author.name} Taking a break: ":
+        message = f"{ctx.author.name} Nobody is taking a break!"
     await ctx.send(message)
 
 
@@ -250,6 +250,15 @@ async def leaderboard(ctx):
         string += f"{str(x+1)}. {points_list[x][0]} ({points_list[x][1]}), "
     string = string[:-2] + "."
     await ctx.send(string)
+
+@bot.command(name='position')
+async def position(ctx):
+    cur.execute("SELECT * FROM USERS ORDER BY POINTS DESC")
+    points_list = cur.fetchall()
+    string = "Top 10 Points: "
+    for x in range(len(points_list)):
+        if points_list[x][0] == ctx.author.name.lower():
+            await ctx.send(f"{ctx.author.name}, you are currently ranked: {x+1}")
 
 
 #05 - Games
