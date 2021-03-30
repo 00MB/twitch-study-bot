@@ -57,7 +57,7 @@ def isint(var):
 async def timer_validation(ctx, time):
     if isint(time):
         if int(time) < 5 or int(time) > 60:
-            await ctx.send(f"{ctx.author.name} You can't study for that amount of time, please choose a different time!")
+            await ctx.send(f"{ctx.author.name} You can't study/break for that amount of time, please choose a different time!")
         elif not None and timers.get_timer(ctx.author.name) is None:
             return True
         else:
@@ -93,23 +93,36 @@ async def cancel(ctx):
 
 @bot.command(name='study')
 async def study(ctx, study_time=''):
+    user = ctx.author.name.lower()
     if await timer_validation(ctx, study_time):
         await ctx.send(f'{ctx.author.name} has started studying for {study_time} minutes!')
-        timers.set_timer(ctx.author.name, study_time, "study")
-        await asyncio.sleep(int(study_time)*60)
-        if timers.get_timer(ctx.author.name) is not None:
-            await ctx.send(f'{ctx.author.name} time up! Good work, take a break with !break')
-            timers.cancel_timer(ctx.author.name)
+        timers.set_timer(user, study_time, "study")
+        await asyncio.sleep(int(study_time))
+        if timers.get_timer(user) is not None:
+            await ctx.send(f'{ctx.author.name} time up! Good work you earned {int(study_time)*10} points, take a break with !break')
+            user_found = checkdb(user)
+            if user_found is None:
+                await adduser(user)
+            cur.execute("UPDATE USERS SET points = ? WHERE name = ?", ((int(study_time)*10)+int(user_found[1]), user))
+            con.commit()
+            timers.cancel_timer(user)
 
 @bot.command(name='break')
 async def study(ctx, break_time=''):
+    user = ctx.author.name.lower()
     if await timer_validation(ctx, break_time):
         await ctx.send(f'Okay {ctx.author.name}, see you in {break_time} minutes!')
         timers.set_timer(ctx.author.name, break_time, "study")
-        await asyncio.sleep(int(break_time)*60)
+        await asyncio.sleep(int(break_time))
         if timers.get_timer(ctx.author.name) is not None:
-            await ctx.send(f'{ctx.author.name} time up! Get back to work with !study')
+            await ctx.send(f'{ctx.author.name} time up! You earned {int(break_time)*2} points, get back to work with !study')
+            user_found = checkdb(user)
+            if user_found is None:
+                await adduser(user)
+            cur.execute("UPDATE USERS SET points = ? WHERE name = ?", ((int(break_time)*2)+int(user_found[1]), user))
+            con.commit()
             timers.cancel_timer(ctx.author.name)
+            
 
 @bot.command(name='timer')
 async def timer(ctx):
@@ -179,7 +192,6 @@ async def deleteuser(ctx, user):
     else:
         await ctx.send(f"{user} is not in the database")
 
-
 @bot.command(name='setpoints')
 async def setpoints(ctx, user, value):
     user = user.lower()
@@ -229,11 +241,15 @@ async def points(ctx):
     if ctx.author.name.lower() in user_found:
         await ctx.send(f"{user}, you currently have {user_found[1]} points")
 
-@bot.command(name='pointsboard')
-async def pointsboard(ctx):
+@bot.command(name='leaderboard')
+async def leaderboard(ctx):
     cur.execute("SELECT * FROM USERS ORDER BY POINTS DESC")
-    points_list = cur.fetchall()
-    await ctx.send(points_list)
+    points_list = cur.fetchall()[0:10]
+    string = "Top 10 Points: "
+    for x in range(len(points_list)):
+        string += f"{str(x+1)}. {points_list[x][0]} ({points_list[x][1]}), "
+    string = string[:-2] + "."
+    await ctx.send(string)
 
 
 #05 - Games
