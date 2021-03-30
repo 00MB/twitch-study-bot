@@ -2,3 +2,4 @@
 /env
 dialogflow_bot.py
 /__pycache__
+*.db
