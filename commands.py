@@ -181,7 +181,7 @@ async def adduser(ctx, user):
 
 @bot.command(name='deleteuser')
 async def deleteuser(ctx, user):
-    if ctx.author.name != "00mb1":
+    if ctx.author.name != os.getenv('CHANNEL'):
         await ctx.send("unauthorized")
         return
     user = user.lower()
@@ -276,6 +276,7 @@ async def rps(ctx, user_choice):
 
 
 #06 - Misc
+#This is my personal bot, to create a bot view https://github.com/00MB/personal-chatbot
 @bot.command(name='botme')
 async def what(ctx, *tags):
     if tags:
