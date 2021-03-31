@@ -17,7 +17,7 @@ Twitch bot for studying, pomodoro timers, stocks etc. Feel free to add new featu
 ### Points   
 - !points - Check your points  
 - !position - Check your position on the leaderboard  
-- !leaderboard - View top ten 
+- !leaderboard - View top ten points
 - [MOD] !adduser \<name\> - Add's a user to the points database (eg !adduser 00mb)  
 - [MOD] !setpoints \<name\> \<points\> - Set a users points (eg !setpoints 00mb 10)
 - [MOD] !addpoints \<name\> \<points\> - Add's points to a user (eg !addpoints 00mb 10)
