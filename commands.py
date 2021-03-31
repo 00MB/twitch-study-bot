@@ -103,6 +103,7 @@ async def study(ctx, study_time=''):
             user_found = checkdb(user)
             if user_found is None:
                 cur.execute(f"INSERT INTO USERS VALUES (?, 0)", (user,))
+                con.commit()
             cur.execute("UPDATE USERS SET points = ? WHERE name = ?", ((int(study_time)*10)+int(user_found[1]), user))
             con.commit()
             timers.cancel_timer(user)
@@ -119,6 +120,7 @@ async def study(ctx, break_time=''):
             user_found = checkdb(user)
             if user_found is None:
                 cur.execute(f"INSERT INTO USERS VALUES (?, 0)", (user,))
+                con.commit()
             cur.execute("UPDATE USERS SET points = ? WHERE name = ?", ((int(break_time)*2)+int(user_found[1]), user))
             con.commit()
             timers.cancel_timer(ctx.author.name)
