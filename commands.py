@@ -179,6 +179,7 @@ async def adduser(ctx, user):
         await ctx.send(f"{user} is already in the database")
     else:
         cur.execute(f"INSERT INTO USERS VALUES (?, 0)", (user,))
+        con.commit()
         await ctx.send(f"successfully added {user}")
 
 @bot.command(name='deleteuser')
