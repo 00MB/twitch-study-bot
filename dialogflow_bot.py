@@ -6,7 +6,7 @@ load_dotenv()
 
 project_id="mychatbot-307913"
 
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"]="/home/qqze/Documents/Other/other/My_chatbot/MyChatBot-0fda0f7908f9.json"
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"]=os.getenv('DIAGFLOW_PATH')
 
 def send_message(message=None):
     if message:
