@@ -97,12 +97,12 @@ async def study(ctx, study_time=''):
     if await timer_validation(ctx, study_time):
         await ctx.send(f'{ctx.author.name} has started studying for {study_time} minutes!')
         timers.set_timer(user, study_time, "study")
-        await asyncio.sleep(int(study_time))
+        await asyncio.sleep(int(study_time)*60)
         if timers.get_timer(user) is not None:
             await ctx.send(f'{ctx.author.name} time up! Good work you earned {int(study_time)*10} points, take a break with !break')
             user_found = checkdb(user)
             if user_found is None:
-                await adduser(user)
+                cur.execute(f"INSERT INTO USERS VALUES (?, 0)", (user,))
             cur.execute("UPDATE USERS SET points = ? WHERE name = ?", ((int(study_time)*10)+int(user_found[1]), user))
             con.commit()
             timers.cancel_timer(user)
@@ -113,12 +113,12 @@ async def study(ctx, break_time=''):
     if await timer_validation(ctx, break_time):
         await ctx.send(f'Okay {ctx.author.name}, see you in {break_time} minutes!')
         timers.set_timer(ctx.author.name, break_time, "study")
-        await asyncio.sleep(int(break_time))
+        await asyncio.sleep(int(break_time)*60)
         if timers.get_timer(ctx.author.name) is not None:
             await ctx.send(f'{ctx.author.name} time up! You earned {int(break_time)*2} points, get back to work with !study')
             user_found = checkdb(user)
             if user_found is None:
-                await adduser(user)
+                cur.execute(f"INSERT INTO USERS VALUES (?, 0)", (user,))
             cur.execute("UPDATE USERS SET points = ? WHERE name = ?", ((int(break_time)*2)+int(user_found[1]), user))
             con.commit()
             timers.cancel_timer(ctx.author.name)
